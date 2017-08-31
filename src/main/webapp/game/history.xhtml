@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+		"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+	  xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+	  xmlns:h="http://xmlns.jcp.org/jsf/html"
+	  xmlns:f="http://xmlns.jcp.org/jsf/core"
+	  xmlns:p="http://primefaces.org/ui">
+
+<f:metadata>
+	<f:viewParam name="player" value="#{historyController.player}"/>
+	<f:viewAction action="#{historyController.init}"/>
+</f:metadata>
+
+<ui:composition template="../layout.xhtml">
+
+	<ui:define name="content">
+		<h:form id="form">
+			<p:panel header="Historia gier">
+				<p:commandButton value="Historia" update="form" action="#{historyController.loadAllHistory()}"/>
+				<p:commandButton value="Moja historia" update="form"
+								 action="#{historyController.loadHistoryForPlayer(user)}"/>
+				<p:dataTable value="#{historyController.history}" var="row" rowIndexVar="rowIdx">
+					<p:column>
+						x
+					</p:column>
+					<p:column headerText="X">
+						<p:commandButton value="#{row.playerCross}" update="form"
+										 action="#{historyController.loadHistoryForPlayer(row.playerCross)}"/>
+					</p:column>
+					<p:column headerText="O">
+						<p:commandButton value="#{row.playerCircle}" update="form"
+										 action="#{historyController.loadHistoryForPlayer(row.playerCircle)}"/>
+					</p:column>
+					<p:column headerText="Rezultat">
+						#{row.result}
+					</p:column>
+					<p:column headerText="Zwyciezca">
+						#{row.winner}
+					</p:column>
+					<p:column>
+						#{row.endGame}
+					</p:column>
+				</p:dataTable>
+			</p:panel>
+		</h:form>
+	</ui:define>
+
+</ui:composition>
+</html>
