@@ -46,8 +46,7 @@ public class PlayerListController {
 	@RequestAction
 	@IgnorePostback
 	public void loadData() {
-		players = new HashSet<>();
-		players = playerService.findAvailablePlayersForGame();
+		players = new HashSet<>(playerService.findAvailablePlayersForGame());
 	}
 
 	public String playPlayerGame(String player) {

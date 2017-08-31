@@ -68,17 +68,17 @@ public class Board {
 			}
 		}
 
-		//check anti diag (thanks rampion)
-		if(x + y == boardSize - 1) {
-			for(int i = 0; i < boardSize; i++) {
-				if(board[i][y] == null || (board[i][(boardSize - 1) - i] != state)) {
-					break;
-				}
-				if(i == boardSize - 1) {
-					return GameStatus.WIN;
-				}
-			}
-		}
+//		//check anti diag
+//		if(x + y == boardSize - 1) {
+//			for(int i = 0; i < boardSize; i++) {
+//				if(board[i][y] == null || (board[i][(boardSize - 1) - i] != state)) {
+//					break;
+//				}
+//				if(i == boardSize - 1) {
+//					return GameStatus.WIN;
+//				}
+//			}
+//		}
 
 		// remis
 		if(moveCount == (boardSize * boardSize)) {

@@ -1,6 +1,5 @@
 package com.czecht.tictactoe.controller;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.commons.lang3.StringUtils;
@@ -10,8 +9,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
-import com.czecht.tictactoe.application.GameService;
-import com.czecht.tictactoe.domain.history.GameHistory;
+import com.czecht.tictactoe.readmodel.HistoryDto;
+import com.czecht.tictactoe.readmodel.HistoryFinder;
 
 import lombok.Getter;
 import lombok.Setter;
@@ -27,13 +26,13 @@ public class HistoryController {
 	private String player;
 
 	@Getter
-	private List<GameHistory> history;
+	private List<HistoryDto> history;
 
-	private final GameService gameService;
+	private final HistoryFinder historyFinder;
 
 	@Autowired
-	public HistoryController(GameService gameService) {
-		this.gameService = gameService;
+	public HistoryController(HistoryFinder historyFinder) {
+		this.historyFinder = historyFinder;
 	}
 
 	public void init() {
@@ -45,11 +44,11 @@ public class HistoryController {
 	}
 
 	public void loadAllHistory() {
-		history = new ArrayList<>(gameService.findAllHistory());
+		history = historyFinder.findAll();
 	}
 
 	public void loadHistoryForPlayer(String player) {
-		history = new ArrayList<>(gameService.findHistoryForPlayer(player));
+		history = historyFinder.findByPlayer(player);
 	}
 
 }

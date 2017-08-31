@@ -42,6 +42,7 @@ public class PlayerService {
 		playerStorage.removePlayer(player);
 	}
 
+	//todo: consider immutable collection
 	public Set<String> findAvailablePlayersForGame() {
 		Set<String> allPlayers = new HashSet<>(playerStorage.findAll());
 		Set<String> playingPlayers = gameStorage.findAllPlayingPlayers();

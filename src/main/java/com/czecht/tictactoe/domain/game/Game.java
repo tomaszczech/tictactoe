@@ -1,16 +1,9 @@
 package com.czecht.tictactoe.domain.game;
 
-import java.util.Date;
-
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.Transient;
+import org.joda.time.DateTime;
 
 import lombok.AccessLevel;
 import lombok.Getter;
-import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @Getter
@@ -25,13 +18,11 @@ public class Game {
 
 	private String currentPlayer;
 
-	private Date endDate;
+	private DateTime startDate;
 
-	@Transient
 	private Movement prevMovement;
 
 	@Getter(AccessLevel.NONE)
-	@Transient
 	private Board board;
 
 	public Game(String player0, String player1, String startPlayer) {
@@ -39,6 +30,7 @@ public class Game {
 		this.player1 = player1;
 		this.currentPlayer = player0.equals(startPlayer) ? player1 : player0;
 		this.board = new Board();
+		this.startDate = new DateTime();
 	}
 
 	public void makeMove(Movement movement) {
@@ -78,4 +70,7 @@ public class Game {
 	}
 
 
+	public static Game getInstance(String first, String second) {
+		return new Game(first, second, first);
+	}
 }

@@ -26,7 +26,7 @@
 
 			</p:dataTable>
 
-			<p:socket onMessage="handleMessage" channel="/#{loginController.username}"/>
+			<p:socket autoConnect="true" onMessage="handleMessage" channel="/#{loginController.username}" />
 			<script type="text/javascript">
 				function handleMessage(data) {
 					newGameAction([{name: 'newGameId', value: data}]);

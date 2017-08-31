@@ -1,6 +1,5 @@
 package com.czecht.tictactoe.application;
 
-import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -8,6 +7,7 @@ import java.util.concurrent.ThreadLocalRandom;
 
 import javax.faces.application.FacesMessage;
 
+import org.joda.time.DateTime;
 import org.primefaces.push.EventBus;
 import org.primefaces.push.EventBusFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,18 +15,15 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.czecht.tictactoe.domain.game.Game;
-import com.czecht.tictactoe.domain.game.GameFactory;
-import com.czecht.tictactoe.domain.history.GameHistory;
 import com.czecht.tictactoe.domain.game.GameStatus;
 import com.czecht.tictactoe.domain.game.Movement;
+import com.czecht.tictactoe.domain.history.GameHistory;
 import com.czecht.tictactoe.domain.history.GameHistoryRepository;
 import com.czecht.tictactoe.infrastructure.push.PushChannel;
 import com.czecht.tictactoe.infrastructure.storage.GameStorage;
 
 @Service
 public class GameService {
-
-	private final GameFactory gameFactory;
 
 	private final GameStorage gameStorage;
 
@@ -35,16 +32,15 @@ public class GameService {
 	private final GameHistoryRepository gameHistoryRepository;
 
 	@Autowired
-	public GameService(GameFactory gameFactory, GameStorage gameStorage, PlayerService playerService,
+	public GameService(GameStorage gameStorage, PlayerService playerService,
 			GameHistoryRepository gameHistoryRepository) {
-		this.gameFactory = gameFactory;
 		this.gameStorage = gameStorage;
 		this.playerService = playerService;
 		this.gameHistoryRepository = gameHistoryRepository;
 	}
 
 	public Game createGame(String player) {
-		Game game = gameFactory.createGame(player, playerService.getCurrentUser());
+		Game game = Game.getInstance(player, playerService.getCurrentUser());
 		gameStorage.addGame(game);
 		EventBus eventBus = EventBusFactory.getDefault().eventBus();
 		eventBus.publish(player, game.getId());
@@ -59,7 +55,8 @@ public class GameService {
 
 		String randomPlayer = players.iterator().next();
 
-		Game game = gameFactory.createGame(randomPlayer, playerService.getCurrentUser());
+		Game game = Game.getInstance(randomPlayer, playerService.getCurrentUser());
+
 		EventBus eventBus = EventBusFactory.getDefault().eventBus();
 		eventBus.publish(randomPlayer, game.getId());
 		return game;
@@ -71,6 +68,7 @@ public class GameService {
 
 	@Transactional
 	public void makeMove(Game game, Movement movement) {
+
 		Game currentGame = gameStorage.findGameById(game.getId());
 		currentGame.makeMove(movement);
 		GameStatus gameStatus = currentGame.checkGameStatus();
@@ -82,7 +80,7 @@ public class GameService {
 			eventBus.publish(String.format(PushChannel.BOARD_CHANNEL, currentGame.getPlayer1()), game.getId());
 		} else {
 			GameHistory.GameHistoryBuilder historyBuilder = GameHistory.builder()
-					.endGame(new Date())
+					.gameTime(new DateTime().minus(game.getStartDate().getMillis()).getMillis())
 					.playerCircle(currentGame.getPlayerO())
 					.playerCross(currentGame.getPlayerX());
 			if(GameStatus.WIN.equals(gameStatus)) {
@@ -106,10 +104,10 @@ public class GameService {
 		}
 	}
 
-	@Transactional(readOnly = true)
-	public List<GameHistory> findAllHistory() {
-		return gameHistoryRepository.findAll();
-	}
+//	@Transactional(readOnly = true)
+//	public List<GameHistory> findAllHistory() {
+//		return gameHistoryRepository.findAll();
+//	}
 
 	@Transactional(readOnly = true)
 	public List<GameHistory> findHistoryForPlayer(String player) {
