@@ -1,5 +1,6 @@
 package com.czecht.tictactoe.application;
 
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -51,16 +52,25 @@ public class GameService {
 		Set<String> players = new HashSet<>(playerService.findAvailablePlayersForGame());
 		players.remove(playerService.getCurrentUser());
 
-		int randomNum = ThreadLocalRandom.current().nextInt(0, players.size() - 1);
+		List<String> listToRandomPlayer = new ArrayList<>();
+		listToRandomPlayer.addAll(players);
 
-		String randomPlayer = players.iterator().next();
+		int randomIndex=0;
+		if(players.size()>1) {
+			randomIndex = ThreadLocalRandom.current().nextInt(0, players.size() - 1);
+		}
+
+		String randomPlayer = listToRandomPlayer.get(randomIndex);
 
 		Game game = Game.getInstance(randomPlayer, playerService.getCurrentUser());
+		gameStorage.addGame(game);
 
 		EventBus eventBus = EventBusFactory.getDefault().eventBus();
 		eventBus.publish(randomPlayer, game.getId());
 		return game;
 	}
+
+
 
 	public Game findGameById(Long gameId) {
 		return gameStorage.findGameById(gameId);
@@ -102,15 +112,5 @@ public class GameService {
 			gameHistoryRepository.save(historyBuilder.build());
 			gameStorage.delete(currentGame);
 		}
-	}
-
-//	@Transactional(readOnly = true)
-//	public List<GameHistory> findAllHistory() {
-//		return gameHistoryRepository.findAll();
-//	}
-
-	@Transactional(readOnly = true)
-	public List<GameHistory> findHistoryForPlayer(String player) {
-		return gameHistoryRepository.findByPayer(player);
 	}
 }

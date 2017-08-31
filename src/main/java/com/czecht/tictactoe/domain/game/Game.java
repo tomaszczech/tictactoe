@@ -1,5 +1,7 @@
 package com.czecht.tictactoe.domain.game;
 
+import java.util.concurrent.ThreadLocalRandom;
+
 import org.joda.time.DateTime;
 
 import lombok.AccessLevel;
@@ -69,8 +71,8 @@ public class Game {
 		return player0;
 	}
 
-
 	public static Game getInstance(String first, String second) {
-		return new Game(first, second, first);
+		int randomNum = ThreadLocalRandom.current().nextInt(0, 1);
+		return randomNum == 0 ? new Game(first, second, first) : new Game(first, second, second);
 	}
 }

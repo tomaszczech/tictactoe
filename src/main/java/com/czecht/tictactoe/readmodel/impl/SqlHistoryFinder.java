@@ -32,7 +32,7 @@ public class SqlHistoryFinder extends AbstractSqlFinder implements HistoryFinder
 	public List<HistoryDto> findByPlayer(String player) {
 		return getSession().createSQLQuery(
 				"select player_circle as playerCircle, player_cross as playerCross, winner, result, "
-						+ "game_time as gameTime from HISTORY where player_circle=:player or player_cross=:player order by gameTime desc ó")
+						+ "game_time as gameTime from HISTORY where player_circle=:player or player_cross=:player order by gameTime desc ")
 				.addScalar("playerCircle")
 				.addScalar("playerCross")
 				.addScalar("winner")
