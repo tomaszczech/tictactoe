@@ -52,6 +52,6 @@ public class LoginController {
 	public String logout() {
 		FacesContext.getCurrentInstance().getExternalContext().invalidateSession();
 		playerService.logoutPlayer(username);
-		return "../login.xhtml?faces-redirect=true";
+		return "/login.jsf?faces-redirect=true";
 	}
 }
