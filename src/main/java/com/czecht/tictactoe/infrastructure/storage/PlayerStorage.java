@@ -13,10 +13,6 @@ public class PlayerStorage {
 
 	private Set<String> players = new HashSet<>();
 
-	public PlayerStorage() {
-		System.out.println("create PlayerStorage");
-	}
-
 	public Set<String> findAll() {
 		return players;
 	}
