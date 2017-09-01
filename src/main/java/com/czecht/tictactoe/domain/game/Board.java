@@ -65,7 +65,7 @@ public class Board {
 			}
 		}
 
-		//check anti diag
+		// krosowe
 		if(x + y == boardSize - 1) {
 			for(int i = 0; i < boardSize; i++) {
 				if(board[i][(boardSize - 1) - i] == null || (board[i][(boardSize - 1) - i] != state)) {
