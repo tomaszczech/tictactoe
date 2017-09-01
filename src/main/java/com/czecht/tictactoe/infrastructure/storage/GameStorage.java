@@ -16,13 +16,13 @@ public class GameStorage {
 
 	private Long idSequence = 0L;
 
-	private Map<Long, Game> games = new HashMap<>();
+	private String GAME_ID = "GAME_%s";
+
+	private Map<String, Game> games = new HashMap<>();
 
 	public void addGame(Game game) {
-		Long gameId = idSequence++;
-
-		game.setId(gameId);
-		games.put(gameId, game);
+		game.setId(generateId());
+		games.put(game.getId(), game);
 	}
 
 	public void delete(Game game) {
@@ -33,15 +33,26 @@ public class GameStorage {
 		Set<String> players = new HashSet<>();
 
 		for(Game game : games.values()) {
-			players.add(game.getPlayer0());
-			players.add(game.getPlayer1());
+			players.add(game.getPlayerCircle());
+			players.add(game.getPlayerCross());
 		}
 
 		return players;
 	}
 
-	public Game findGameById(Long gameId) {
+	public Game findGameById(String gameId) {
 		return games.get(gameId);
 	}
 
+	public boolean isPlayerInGame(String player) {
+		return games.values()
+				.stream()
+				.anyMatch(game -> game.getPlayerCircle().equals(player) || game.getPlayerCross().equals(player));
+
+	}
+
+	private String generateId() {
+		idSequence++;
+		return String.format(GAME_ID, idSequence);
+	}
 }

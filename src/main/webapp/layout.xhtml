@@ -9,7 +9,7 @@
 		<meta charset="utf-8"/>
 		<meta http-equiv="X-UA-Compatible" content="IE=edge"/>
 		<meta name="viewport" content="width=device-width, initial-scale=1"/>
-		<title><ui:insert name="title">Kolko-Krzyzyk</ui:insert></title>
+		<title><ui:insert name="title">TicTacToe</ui:insert></title>
 	</h:head>
 	<h:body>
 		<div class="ui-g">
@@ -21,9 +21,9 @@
 				<p:layoutUnit position="north" size="100">
 					<p:toolbar>
 						<f:facet name="left">
-							<p:button href="/game/players" value="Lista dostepnych graczy"/>
-							<p:button href="/game/history.jsf?faces-redirect=true" value="Historia gier"/>
-							<p:commandButton value="Wyloguj[#{user}]" action="#{loginController.logout}"/>
+							<p:button href="/game/players" value="Players list"/>
+							<p:button href="/game/history.jsf?faces-redirect=true" value="Game history"/>
+							<p:commandButton value="Logout[#{user}]" action="#{loginController.logout}"/>
 						</f:facet>
 					</p:toolbar>
 				</p:layoutUnit>

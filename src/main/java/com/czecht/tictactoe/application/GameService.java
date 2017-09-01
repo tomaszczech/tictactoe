@@ -1,16 +1,9 @@
 package com.czecht.tictactoe.application;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-import java.util.concurrent.ThreadLocalRandom;
-
 import javax.faces.application.FacesMessage;
 
+import org.apache.commons.lang3.StringUtils;
 import org.joda.time.DateTime;
-import org.primefaces.push.EventBus;
-import org.primefaces.push.EventBusFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -23,8 +16,11 @@ import com.czecht.tictactoe.domain.history.GameHistoryRepository;
 import com.czecht.tictactoe.infrastructure.push.PushChannel;
 import com.czecht.tictactoe.infrastructure.storage.GameStorage;
 
+import lombok.extern.slf4j.Slf4j;
+
+@Slf4j
 @Service
-public class GameService {
+public class GameService extends AbstractService {
 
 	private final GameStorage gameStorage;
 
@@ -41,38 +37,47 @@ public class GameService {
 	}
 
 	public Game createGame(String player) {
+		//todo check is avaliable
+		boolean playerLogged = playerService.isPlayerLogged(player);
+		boolean playerInGame = gameStorage.isPlayerInGame(player);
+
+		if(!playerLogged || playerInGame) {
+			return null;
+		}
+
 		Game game = Game.getInstance(player, playerService.getCurrentUser());
 		gameStorage.addGame(game);
-		EventBus eventBus = EventBusFactory.getDefault().eventBus();
-		eventBus.publish(player, game.getId());
+
+		pushMessage(player, game.getId());
+
+		log.info(String.format("New game created, game_id: %s, players [%s, %s].",
+				game.getId(),
+				player,
+				playerService.getCurrentUser()));
 		return game;
 	}
 
 	public Game createRandomGame() {
-		Set<String> players = new HashSet<>(playerService.findAvailablePlayersForGame());
-		players.remove(playerService.getCurrentUser());
+		String randomPlayer = playerService.getRandomPlayerForGame();
 
-		List<String> listToRandomPlayer = new ArrayList<>();
-		listToRandomPlayer.addAll(players);
-
-		int randomIndex=0;
-		if(players.size()>1) {
-			randomIndex = ThreadLocalRandom.current().nextInt(0, players.size() - 1);
+		if(StringUtils.isEmpty(randomPlayer)) {
+			log.info("No players available.");
+			return null;
 		}
-
-		String randomPlayer = listToRandomPlayer.get(randomIndex);
 
 		Game game = Game.getInstance(randomPlayer, playerService.getCurrentUser());
 		gameStorage.addGame(game);
 
-		EventBus eventBus = EventBusFactory.getDefault().eventBus();
-		eventBus.publish(randomPlayer, game.getId());
+		pushMessage(randomPlayer, game.getId());
+		log.info(String.format("New random game created, game_id: %s, players [%s, %s].",
+				game.getId(),
+				randomPlayer,
+				playerService.getCurrentUser()));
+
 		return game;
 	}
 
-
-
-	public Game findGameById(Long gameId) {
+	public Game findGameById(String gameId) {
 		return gameStorage.findGameById(gameId);
 	}
 
@@ -80,37 +85,48 @@ public class GameService {
 	public void makeMove(Game game, Movement movement) {
 
 		Game currentGame = gameStorage.findGameById(game.getId());
+		if(!currentGame.isActive()) {
+			String gameResult = currentGame.checkGameStatus().toString();
+			String winner = currentGame.getWinner();
+			String messageDetails = String.format("%s %s", gameResult, winner);
+			FacesMessage message = new FacesMessage("Game end.", messageDetails);
+			pushMessage(String.format(PushChannel.BOARD_MESSAGE_CHANNEL, currentGame.getPlayerCircle()), message);
+			pushMessage(String.format(PushChannel.BOARD_MESSAGE_CHANNEL, currentGame.getPlayerCross()), message);
+			return;
+		}
+
 		currentGame.makeMove(movement);
 		GameStatus gameStatus = currentGame.checkGameStatus();
 
-		EventBus eventBus = EventBusFactory.getDefault().eventBus();
-
 		if(GameStatus.CONTINOUE.equals(gameStatus)) {
-			eventBus.publish(String.format(PushChannel.BOARD_CHANNEL, currentGame.getPlayer0()), game.getId());
-			eventBus.publish(String.format(PushChannel.BOARD_CHANNEL, currentGame.getPlayer1()), game.getId());
+			pushMessage(String.format(PushChannel.BOARD_CHANNEL, currentGame.getPlayerCross()), game.getId());
+			pushMessage(String.format(PushChannel.BOARD_CHANNEL, currentGame.getPlayerCircle()), game.getId());
 		} else {
-			GameHistory.GameHistoryBuilder historyBuilder = GameHistory.builder()
+
+				GameHistory.GameHistoryBuilder historyBuilder = GameHistory.builder()
 					.gameTime(new DateTime().minus(game.getStartDate().getMillis()).getMillis())
-					.playerCircle(currentGame.getPlayerO())
-					.playerCross(currentGame.getPlayerX());
-			if(GameStatus.WIN.equals(gameStatus)) {
-				historyBuilder.result(GameHistory.GameResult.WIN).winner(movement.getPlayer());
+					.playerCircle(currentGame.getPlayerCircle())
+					.playerCross(currentGame.getPlayerCross())
+					.result(convertResult(game.checkGameStatus()))
+					.winner(game.getWinner());
 
-				String status = "Wygral: " + movement.getPlayer();
-				FacesMessage message = new FacesMessage("Koniec.", status);
-				eventBus.publish(String.format(PushChannel.BOARD_MESSAGE_CHANNEL, currentGame.getPlayer0()), message);
-				eventBus.publish(String.format(PushChannel.BOARD_MESSAGE_CHANNEL, currentGame.getPlayer1()), message);
-			} else {
-				historyBuilder.result(GameHistory.GameResult.DRAW);
-
-				String status = "Remis";
-				FacesMessage message = new FacesMessage("Koniec.", status);
-				eventBus.publish(String.format(PushChannel.BOARD_MESSAGE_CHANNEL, currentGame.getPlayer0()), message);
-				eventBus.publish(String.format(PushChannel.BOARD_MESSAGE_CHANNEL, currentGame.getPlayer1()), message);
-			}
+			String gameResult = currentGame.checkGameStatus().toString();
+			String winner = currentGame.getWinner();
+			String messageDetails = String.format("%s %s", gameResult, winner);
+			FacesMessage message = new FacesMessage("Game end.", messageDetails);
+			pushMessage(String.format(PushChannel.BOARD_MESSAGE_CHANNEL, currentGame.getPlayerCircle()), message);
+			pushMessage(String.format(PushChannel.BOARD_MESSAGE_CHANNEL, currentGame.getPlayerCross()), message);
 
 			gameHistoryRepository.save(historyBuilder.build());
 			gameStorage.delete(currentGame);
+		}
+	}
+
+	private GameHistory.GameResult convertResult(GameStatus gameStatus){
+		if(GameStatus.WIN.equals(gameStatus)) {
+			return GameHistory.GameResult.WIN;
+		} else {
+			return GameHistory.GameResult.DRAW;
 		}
 	}
 }

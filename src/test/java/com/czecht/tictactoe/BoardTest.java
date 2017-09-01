@@ -41,23 +41,7 @@ public class BoardTest {
 		GameStatus gameStatus = board.checkBoardState(0, 1, 1);
 
 		// then
-		assertThat(gameStatus).isEqualTo(GameStatus.WIN);
-	}
-
-	@DataProvider
-	public Object[][] drawBoards() {
-		return new Object[][] { { new BoardBuilder().line1(1, 0, null).line2(1, 0, null).build() } };
-	}
-
-	@Test(dataProvider = "drawBoards")
-	public void testDrawBoard(Board board) {
-		// given
-
-		// when
-		GameStatus gameStatus = board.checkBoardState(0, 1, 1);
-
-		// then
-		assertThat(gameStatus).isEqualTo(GameStatus.DRAW);
+		assertThat(gameStatus).isEqualTo(GameStatus.CONTINOUE);
 	}
 
 	private static class BoardBuilder {

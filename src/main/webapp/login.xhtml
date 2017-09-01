@@ -9,16 +9,16 @@
 		<meta charset="utf-8" />
 		<meta http-equiv="X-UA-Compatible" content="IE=edge" />
 		<meta name="viewport" content="width=device-width, initial-scale=1" />
-		<title><ui:insert name="title">Kolko-Krzyzyk</ui:insert></title>
+		<title><ui:insert name="title">TicTacToe</ui:insert></title>
 	</h:head>
 	<h:body>
 		<h:form id="form">
 			<p:messages id="messages" showDetail="true" autoUpdate="true" closable="false" />
-			<p:panel header="Logowanie">
+			<p:panel header="Login">
 				<h:panelGrid columns="2">
-					<p:outputLabel for="name" value="Login: " />
+					<p:outputLabel for="name" value="Username: " />
 					<p:inputText id="name" value="#{loginController.username}" required="true"/>
-					<h:commandButton value="Zaloguj" action="#{loginController.login}" />
+					<h:commandButton value="Submit" action="#{loginController.login}" />
 				</h:panelGrid>
 			</p:panel>
 		</h:form>

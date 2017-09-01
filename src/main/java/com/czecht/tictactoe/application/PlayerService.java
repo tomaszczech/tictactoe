@@ -1,7 +1,10 @@
 package com.czecht.tictactoe.application;
 
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
+import java.util.concurrent.ThreadLocalRandom;
 
 import javax.faces.context.FacesContext;
 
@@ -54,5 +57,26 @@ public class PlayerService {
 	public String getCurrentUser() {
 		FacesContext context = FacesContext.getCurrentInstance();
 		return (String)context.getExternalContext().getSessionMap().get("user");
+	}
+
+	public boolean isPlayerLogged(String player) {
+		return playerStorage.isPlayerExists(player);
+	}
+
+	public String getRandomPlayerForGame() {
+		Set<String> players = new HashSet<>(findAvailablePlayersForGame());
+		if(players.isEmpty()) {
+			return null;
+		}
+
+		List<String> listToRandomPlayer = new ArrayList<>();
+		listToRandomPlayer.addAll(players);
+
+		int randomIndex=0;
+		if(players.size()>1) {
+			randomIndex = ThreadLocalRandom.current().nextInt(0, players.size() - 1);
+		}
+
+		return listToRandomPlayer.get(randomIndex);
 	}
 }

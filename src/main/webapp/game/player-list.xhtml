@@ -10,30 +10,33 @@
 	<ui:define name="content">
 		<h:form id="form">
 			<p:growl widgetVar="growl" showDetail="true"/>
-			<h:commandButton value="Gra losowa" action="#{playerListController.playRandomGame()}"/>
+			<h:commandButton value="Random game" action="#{playerListController.playRandomGame()}"/>
 
 			<p:dataTable value="#{playerListController.players}" var="player">
 
-				<p:column headerText="Gracz">
+				<p:column headerText="Player">
 					<h:outputText value="#{player}"/>
 				</p:column>
 				<p:column headerText="">
-					<p:commandButton value="Graj" action="#{playerListController.playPlayerGame(player)}"/>
+					<p:commandButton value="Play" action="#{playerListController.playPlayerGame(player)}"/>
 				</p:column>
 				<p:column headerText="">
-					<p:button href="/game/history.jsf?faces-redirect=true&amp;player=#{player}" value="Historia"/>
+					<p:button href="/game/history.jsf?faces-redirect=true&amp;player=#{player}" value="History"/>
 				</p:column>
 
 			</p:dataTable>
 
-			<p:socket autoConnect="true" onMessage="handleMessage" channel="/#{loginController.username}" />
+			<p:socket autoConnect="true" onMessage="handleMessage" channel="/#{loginController.username}"
+			transport="streaming"/>
 			<script type="text/javascript">
 				function handleMessage(data) {
 					newGameAction([{name: 'newGameId', value: data}]);
 				}
 			</script>
 			<p:remoteCommand name="newGameAction" actionListener="#{playerListController.handleNewGameAction}"/>
+
 		</h:form>
+
 	</ui:define>
 
 </ui:composition>

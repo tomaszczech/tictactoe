@@ -20,14 +20,11 @@ public class Board {
 	}
 
 	public void markPosition(int x, int y, int state) {
-		if(moveCount == (boardSize * boardSize)) {
-			throw new DomainOperationException("Gra zakończona");
-		}
 		if(x < 0 || x > boardSize || y < 0 || y > boardSize) {
-			throw new DomainOperationException(String.format("Niedozwolona pozycja [%s][%s]", x, y));
+			throw new DomainOperationException(String.format("Illegal position [%s][%s]", x, y));
 		}
 		if(board[x][y] != null) {
-			throw new DomainOperationException(String.format("Pozycja [%s][%s] jest już użyta", x, y));
+			throw new DomainOperationException(String.format("The position [%s][%s] is already marked.", x, y));
 		}
 
 		board[x][y] = state;
@@ -59,7 +56,7 @@ public class Board {
 		// srodek
 		if(x == y) {
 			for(int i = 0; i < boardSize; i++) {
-				if(board[i][y] == null || (board[i][i] != state)) {
+				if(board[i][i] == null || (board[i][i] != state)) {
 					break;
 				}
 				if(i == boardSize - 1) {
@@ -68,14 +65,25 @@ public class Board {
 			}
 		}
 
-//		//check anti diag
-//		if(x + y == boardSize - 1) {
-//			for(int i = 0; i < boardSize; i++) {
-//				if(board[i][y] == null || (board[i][(boardSize - 1) - i] != state)) {
+		//check anti diag
+		if(x + y == boardSize - 1) {
+			for(int i = 0; i < boardSize; i++) {
+				if(board[i][(boardSize - 1) - i] == null || (board[i][(boardSize - 1) - i] != state)) {
+					break;
+				}
+				if(i == boardSize - 1) {
+					return GameStatus.WIN;
+				}
+			}
+		}
+
+//		//check anti diag (thanks rampion)
+//		if(x + y = n - 1){
+//			for(int i = 0;i<n;i++){
+//				if(board[i][(n-1)-i] != s)
 //					break;
-//				}
-//				if(i == boardSize - 1) {
-//					return GameStatus.WIN;
+//				if(i == n-1){
+//					//report win for s
 //				}
 //			}
 //		}

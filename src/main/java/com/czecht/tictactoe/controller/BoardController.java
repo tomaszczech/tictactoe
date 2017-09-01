@@ -1,9 +1,7 @@
 package com.czecht.tictactoe.controller;
 
 import java.io.IOException;
-import java.util.Map;
 
-import javax.annotation.PostConstruct;
 import javax.faces.context.FacesContext;
 
 import org.ocpsoft.rewrite.annotation.Join;
@@ -14,7 +12,6 @@ import org.springframework.stereotype.Component;
 
 import com.czecht.tictactoe.application.GameService;
 import com.czecht.tictactoe.domain.game.Game;
-import com.czecht.tictactoe.domain.game.GameStatus;
 import com.czecht.tictactoe.domain.game.Movement;
 
 import lombok.Getter;
@@ -51,14 +48,14 @@ public class BoardController {
 	}
 
 	public void init() {
-		game = gameService.findGameById(Long.valueOf(gameId));
+		game = gameService.findGameById(gameId);
 	}
 
 	public void makeMove() throws IOException {
 		String x = FacesContext.getCurrentInstance().getExternalContext().getRequestParameterMap().get("x");
 		String y = FacesContext.getCurrentInstance().getExternalContext().getRequestParameterMap().get("y");
 		gameService.makeMove(game, new Movement(Integer.valueOf(x), Integer.valueOf(y), loginController.getUsername()));
-		game = gameService.findGameById(Long.valueOf(gameId));
+		game = gameService.findGameById(gameId);
 	}
 
 	public String convertSign(Integer sign) {

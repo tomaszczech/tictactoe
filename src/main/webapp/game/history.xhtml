@@ -17,8 +17,8 @@
 	<ui:define name="content">
 		<h:form id="form">
 			<p:panel header="Historia gier">
-				<p:commandButton value="Historia" update="form" action="#{historyController.loadAllHistory()}"/>
-				<p:commandButton value="Moja historia" update="form"
+				<p:commandButton value="History all" update="form" action="#{historyController.loadAllHistory()}"/>
+				<p:commandButton value="My history" update="form"
 								 action="#{historyController.loadHistoryForPlayer(user)}"/>
 				<p:dataTable value="#{historyController.history}" var="row" rowIndexVar="rowIdx">
 					<p:column>
@@ -32,13 +32,13 @@
 						<p:commandButton value="#{row.playerCircle}" update="form"
 										 action="#{historyController.loadHistoryForPlayer(row.playerCircle)}"/>
 					</p:column>
-					<p:column headerText="Rezultat">
+					<p:column headerText="Result">
 						#{row.result}
 					</p:column>
-					<p:column headerText="Zwyciezca">
+					<p:column headerText="Winner">
 						#{row.winner}
 					</p:column>
-					<p:column headerText="Czas gry">
+					<p:column headerText="Game time">
 						#{row.gameTime}
 					</p:column>
 				</p:dataTable>

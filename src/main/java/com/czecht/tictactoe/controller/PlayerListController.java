@@ -4,6 +4,9 @@ import java.io.IOException;
 import java.util.HashSet;
 import java.util.Set;
 
+import javax.faces.application.FacesMessage;
+import javax.faces.bean.SessionScoped;
+import javax.faces.bean.ViewScoped;
 import javax.faces.context.FacesContext;
 
 import org.ocpsoft.rewrite.annotation.Join;
@@ -51,12 +54,23 @@ public class PlayerListController {
 
 	public String playPlayerGame(String player) {
 		Game game = gameService.createGame(player);
+		if(game == null) {
+			FacesContext context = FacesContext.getCurrentInstance();
+			context.addMessage(null, new FacesMessage("Nie mozna zagrac z graczem."));
 
+			return null;
+		}
 		return String.format(NEW_GAME_URL, game.getId());
 	}
 
 	public String playRandomGame() {
 		Game game = gameService.createRandomGame();
+		if(game == null) {
+			FacesContext context = FacesContext.getCurrentInstance();
+			context.addMessage(null, new FacesMessage("Brak dostepnych graczy."));
+
+			return null;
+		}
 		return String.format(NEW_GAME_URL, game.getId());
 	}
 

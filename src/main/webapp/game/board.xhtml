@@ -21,12 +21,12 @@
 			<p:panel id="board" header="Plansza">
 
 				<ul>
-					<li><h:outputText value="X: #{boardController.game.playerX}"/></li>
-					<li><h:outputText value="O: #{boardController.game.playerO}"/></li>
+					<li><h:outputText value="X: #{boardController.game.playerCross}"/></li>
+					<li><h:outputText value="O: #{boardController.game.playerCircle}"/></li>
 					<li><h:outputText value="Ruch gracza: #{boardController.game.nextPlayer}"/></li>
 				</ul>
 
-				<p:growl widgetVar="growl"/>
+				<p:growl widgetVar="growl" life="60000"/>
 				<p:separator />
 
 				<table>
@@ -57,7 +57,6 @@
 
 			<script type="text/javascript">
 				function handleClick(clickable, x, y) {
-					console.log('clickable: ' + clickable);
 					if (clickable == 'true') {
 						makeMove([{name: 'x', value: x}, {name: 'y', value: y}]);
 					}
@@ -65,11 +64,12 @@
 			</script>
 
 			<p:remoteCommand name="makeMove" actionListener="#{boardController.makeMove}"/>
-			<p:socket channel="/board/#{loginController.username}">
+			<p:socket channel="/board/#{loginController.username}" transport="streaming">
 				<p:ajax event="message" update="form:board" />
 			</p:socket>
 
-			<p:socket onMessage="handleMessage" channel="/board/message/#{loginController.username}"/>
+			<p:socket onMessage="handleMessage" channel="/board/message/#{loginController.username}"
+					  transport="streaming"/>
 			<script type="text/javascript">
 				function handleMessage(facesmessage) {
 					facesmessage.severity = 'info';

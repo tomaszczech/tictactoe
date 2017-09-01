@@ -2,21 +2,23 @@ package com.czecht.tictactoe.domain.game;
 
 import java.util.concurrent.ThreadLocalRandom;
 
+import org.apache.commons.lang3.StringUtils;
 import org.joda.time.DateTime;
 
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Setter;
 
+//aggregate root
 @Getter
 public class Game {
 
 	@Setter
-	private long id;
+	private String id;
 
-	private String player0;
+	private String playerCircle;
 
-	private String player1;
+	private String playerCross;
 
 	private String currentPlayer;
 
@@ -27,10 +29,10 @@ public class Game {
 	@Getter(AccessLevel.NONE)
 	private Board board;
 
-	public Game(String player0, String player1, String startPlayer) {
-		this.player0 = player0;
-		this.player1 = player1;
-		this.currentPlayer = player0.equals(startPlayer) ? player1 : player0;
+	public Game(String playerCircle, String playerCross, String startPlayer) {
+		this.playerCircle = playerCircle;
+		this.playerCross = playerCross;
+		this.currentPlayer = playerCircle.equals(startPlayer) ? playerCross : playerCircle;
 		this.board = new Board();
 		this.startDate = new DateTime();
 	}
@@ -42,13 +44,17 @@ public class Game {
 	}
 
 	public GameStatus checkGameStatus() {
+		if(prevMovement == null) {
+			return GameStatus.CONTINOUE;
+		}
+
 		return board.checkBoardState(this.prevMovement.getX(),
 				this.prevMovement.getY(),
 				convertPlayer(this.prevMovement.getPlayer()));
 	}
 
 	private int convertPlayer(String player) {
-		return player.equals(player0) ? 0 : 1;
+		return player.equals(playerCircle) ? 0 : 1;
 	}
 
 	public Integer[][] getBoard() {
@@ -56,19 +62,22 @@ public class Game {
 	}
 
 	public String getCurrentPlayer() {
-		return player0.equals(currentPlayer) ? player0 : player1;
+		return playerCircle.equals(currentPlayer) ? playerCircle : playerCross;
 	}
 
 	public String getNextPlayer() {
-		return player0.equals(currentPlayer) ? player1 : player0;
+		return playerCircle.equals(currentPlayer) ? playerCross : playerCircle;
 	}
 
-	public String getPlayerX() {
-		return player1;
+	public boolean isActive() {
+		return GameStatus.CONTINOUE.equals(checkGameStatus());
 	}
 
-	public String getPlayerO() {
-		return player0;
+	public String getWinner() {
+		if(GameStatus.WIN.equals(checkGameStatus())) {
+			return prevMovement.getPlayer();
+		}
+		return StringUtils.EMPTY;
 	}
 
 	public static Game getInstance(String first, String second) {

@@ -21,7 +21,7 @@ public class NotifyResource {
 	private String user;
 
 	@OnMessage(encoders = { JSONEncoder.class })
-	public Long onMessage(Long newGameId) {
+	public String onMessage(String newGameId) {
 		log.info(String.format("new game[%s]", newGameId));
 		return newGameId;
 	}

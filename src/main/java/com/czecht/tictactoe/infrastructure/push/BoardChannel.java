@@ -17,8 +17,8 @@ public class BoardChannel {
 	private String user;
 
 	@OnMessage(encoders = { JSONEncoder.class })
-	public Long onMessage(Long gameId) {
-		log.info(String.format("move user[%s]", gameId));
+	public String onMessage(String gameId) {
+		log.info(String.format("move on game[%s]", gameId));
 		return gameId;
 	}
 
