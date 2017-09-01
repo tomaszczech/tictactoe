@@ -77,17 +77,6 @@ public class Board {
 			}
 		}
 
-//		//check anti diag (thanks rampion)
-//		if(x + y = n - 1){
-//			for(int i = 0;i<n;i++){
-//				if(board[i][(n-1)-i] != s)
-//					break;
-//				if(i == n-1){
-//					//report win for s
-//				}
-//			}
-//		}
-
 		// remis
 		if(moveCount == (boardSize * boardSize)) {
 			return GameStatus.DRAW;
