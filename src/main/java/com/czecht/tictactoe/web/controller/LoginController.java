@@ -1,4 +1,4 @@
-package com.czecht.tictactoe.controller;
+package com.czecht.tictactoe.web.controller;
 
 import javax.faces.application.FacesMessage;
 import javax.faces.bean.ManagedBean;

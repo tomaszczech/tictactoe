@@ -13,6 +13,8 @@ import lombok.Setter;
 @Getter
 public class Game {
 
+	enum Status {ACTIVE, INACTIVE}
+
 	@Setter
 	private String id;
 
@@ -22,12 +24,15 @@ public class Game {
 
 	private String currentPlayer;
 
+	@Getter(AccessLevel.NONE)
 	private DateTime startDate;
 
 	private Movement prevMovement;
 
 	@Getter(AccessLevel.NONE)
 	private Board board;
+
+	private Status status = Status.ACTIVE;
 
 	public Game(String playerCircle, String playerCross, String startPlayer) {
 		this.playerCircle = playerCircle;
@@ -69,7 +74,7 @@ public class Game {
 		return playerCircle.equals(currentPlayer) ? playerCross : playerCircle;
 	}
 
-	public boolean isActive() {
+	public boolean isContinoueGame() {
 		return GameStatus.CONTINOUE.equals(checkGameStatus());
 	}
 
@@ -80,8 +85,20 @@ public class Game {
 		return StringUtils.EMPTY;
 	}
 
+	public long getGameTime() {
+		return new DateTime().minus(startDate.getMillis()).getMillis();
+	}
+
 	public static Game getInstance(String first, String second) {
 		int randomNum = ThreadLocalRandom.current().nextInt(0, 1);
 		return randomNum == 0 ? new Game(first, second, first) : new Game(first, second, second);
+	}
+
+	public void deactivate() {
+		this.status = Status.INACTIVE;
+	}
+
+	public boolean isActiveGame() {
+		return Status.ACTIVE.equals(status);
 	}
 }

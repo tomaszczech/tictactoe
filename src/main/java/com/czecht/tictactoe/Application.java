@@ -21,6 +21,7 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 import org.springframework.web.context.ServletContextAware;
 
 import com.czecht.tictactoe.shared.LoginFilter;
+import com.google.common.eventbus.EventBus;
 import com.sun.faces.config.ConfigureListener;
 
 @EnableTransactionManagement
@@ -84,5 +85,10 @@ public class Application extends SpringBootServletInitializer implements Servlet
 	@Bean
 	public ServletListenerRegistrationBean<ConfigureListener> jsfConfigureListener() {
 		return new ServletListenerRegistrationBean<ConfigureListener>(new ConfigureListener());
+	}
+
+	@Bean
+	public EventBus getEventBus(){
+		return new EventBus();
 	}
 }

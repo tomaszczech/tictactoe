@@ -3,51 +3,48 @@ package com.czecht.tictactoe.application;
 import javax.faces.application.FacesMessage;
 
 import org.apache.commons.lang3.StringUtils;
-import org.joda.time.DateTime;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
+import com.czecht.tictactoe.ddd.annotations.application.ApplicationService;
 import com.czecht.tictactoe.domain.game.Game;
+import com.czecht.tictactoe.domain.game.GameFinished;
 import com.czecht.tictactoe.domain.game.GameStatus;
 import com.czecht.tictactoe.domain.game.Movement;
-import com.czecht.tictactoe.domain.history.GameHistory;
-import com.czecht.tictactoe.domain.history.GameHistoryRepository;
 import com.czecht.tictactoe.infrastructure.push.PushChannel;
 import com.czecht.tictactoe.infrastructure.storage.GameStorage;
+import com.google.common.eventbus.EventBus;
 
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
-@Service
+@ApplicationService
 public class GameService extends AbstractService {
 
 	private final GameStorage gameStorage;
 
 	private final PlayerService playerService;
 
-	private final GameHistoryRepository gameHistoryRepository;
+	private final EventBus eventBus;
 
 	@Autowired
-	public GameService(GameStorage gameStorage, PlayerService playerService,
-			GameHistoryRepository gameHistoryRepository) {
+	public GameService(GameStorage gameStorage, PlayerService playerService, EventBus eventBus) {
 		this.gameStorage = gameStorage;
 		this.playerService = playerService;
-		this.gameHistoryRepository = gameHistoryRepository;
+		this.eventBus = eventBus;
 	}
 
+	/*
+		consider void method and push message about game creation.
+		Other handlers may handle that message (for statistics, player level etc)
+	 */
 	public Game createGame(String player) {
-		//todo check is avaliable
-		boolean playerLogged = playerService.isPlayerLogged(player);
-		boolean playerInGame = gameStorage.isPlayerInGame(player);
 
-		if(!playerLogged || playerInGame) {
+		if(canPlayerTakeGame(player)) {
 			return null;
 		}
 
 		Game game = Game.getInstance(player, playerService.getCurrentUser());
-		gameStorage.addGame(game);
-
+		game = gameStorage.addGame(game);
 		pushMessage(player, game.getId());
 
 		log.info(String.format("New game created, game_id: %s, players [%s, %s].",
@@ -81,11 +78,11 @@ public class GameService extends AbstractService {
 		return gameStorage.findGameById(gameId);
 	}
 
-	@Transactional
+	// push message for
 	public void makeMove(Game game, Movement movement) {
 
 		Game currentGame = gameStorage.findGameById(game.getId());
-		if(!currentGame.isActive()) {
+		if(!currentGame.isContinoueGame()) {
 			String gameResult = currentGame.checkGameStatus().toString();
 			String winner = currentGame.getWinner();
 			String messageDetails = String.format("%s %s", gameResult, winner);
@@ -103,30 +100,22 @@ public class GameService extends AbstractService {
 			pushMessage(String.format(PushChannel.BOARD_CHANNEL, currentGame.getPlayerCircle()), game.getId());
 		} else {
 
-				GameHistory.GameHistoryBuilder historyBuilder = GameHistory.builder()
-					.gameTime(new DateTime().minus(game.getStartDate().getMillis()).getMillis())
-					.playerCircle(currentGame.getPlayerCircle())
-					.playerCross(currentGame.getPlayerCross())
-					.result(convertResult(game.checkGameStatus()))
-					.winner(game.getWinner());
-
 			String gameResult = currentGame.checkGameStatus().toString();
 			String winner = currentGame.getWinner();
 			String messageDetails = String.format("%s %s", gameResult, winner);
 			FacesMessage message = new FacesMessage("Game end.", messageDetails);
 			pushMessage(String.format(PushChannel.BOARD_MESSAGE_CHANNEL, currentGame.getPlayerCircle()), message);
 			pushMessage(String.format(PushChannel.BOARD_MESSAGE_CHANNEL, currentGame.getPlayerCross()), message);
-
-			gameHistoryRepository.save(historyBuilder.build());
 			gameStorage.delete(currentGame);
+
+			//handle history save
+			eventBus.post(new GameFinished(currentGame.getId()));
 		}
 	}
 
-	private GameHistory.GameResult convertResult(GameStatus gameStatus){
-		if(GameStatus.WIN.equals(gameStatus)) {
-			return GameHistory.GameResult.WIN;
-		} else {
-			return GameHistory.GameResult.DRAW;
-		}
+	private boolean canPlayerTakeGame(String player) {
+		boolean playerLogged = playerService.isPlayerLogged(player);
+		boolean playerInGame = gameStorage.isPlayerInGame(player);
+		return !playerLogged || playerInGame;
 	}
 }

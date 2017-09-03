@@ -1,4 +1,4 @@
-package com.czecht.tictactoe.controller;
+package com.czecht.tictactoe.web.controller;
 
 import java.io.IOException;
 import java.util.HashSet;

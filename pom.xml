@@ -142,6 +142,13 @@
 			<artifactId>lombok</artifactId>
 		</dependency>
 
+		<dependency>
+			<groupId>com.google.guava</groupId>
+			<artifactId>guava</artifactId>
+			<version>23.0</version>
+		</dependency>
+
+
 		<!-- database -->
 		<dependency>
 			<groupId>org.hibernate</groupId>

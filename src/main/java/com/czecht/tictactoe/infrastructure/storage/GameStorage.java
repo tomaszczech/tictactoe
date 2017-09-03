@@ -20,21 +20,25 @@ public class GameStorage {
 
 	private Map<String, Game> games = new HashMap<>();
 
-	public void addGame(Game game) {
+	public Game addGame(Game game) {
 		game.setId(generateId());
 		games.put(game.getId(), game);
+		return game;
 	}
 
 	public void delete(Game game) {
-		games.remove(game.getId());
+		game.deactivate();
+		games.put(game.getId(), game);
 	}
 
 	public Set<String> findAllPlayingPlayers() {
 		Set<String> players = new HashSet<>();
 
 		for(Game game : games.values()) {
-			players.add(game.getPlayerCircle());
-			players.add(game.getPlayerCross());
+			if(game.isActiveGame()) {
+				players.add(game.getPlayerCircle());
+				players.add(game.getPlayerCross());
+			}
 		}
 
 		return players;
@@ -47,7 +51,8 @@ public class GameStorage {
 	public boolean isPlayerInGame(String player) {
 		return games.values()
 				.stream()
-				.anyMatch(game -> game.getPlayerCircle().equals(player) || game.getPlayerCross().equals(player));
+				.anyMatch(game -> game.isActiveGame() && (game.getPlayerCircle().equals(player) || game.getPlayerCross()
+						.equals(player)));
 
 	}
 

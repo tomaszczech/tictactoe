@@ -9,14 +9,17 @@ import java.util.concurrent.ThreadLocalRandom;
 import javax.faces.context.FacesContext;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
+import com.czecht.tictactoe.ddd.annotations.application.ApplicationService;
 import com.czecht.tictactoe.infrastructure.storage.GameStorage;
 import com.czecht.tictactoe.infrastructure.storage.PlayerStorage;
 import com.czecht.tictactoe.shared.DomainOperationException;
 
-@Service
+import lombok.extern.slf4j.Slf4j;
+
+@Slf4j
+@ApplicationService
 public class PlayerService {
 
 	private final PlayerStorage playerStorage;
